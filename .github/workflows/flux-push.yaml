@@ -8,8 +8,6 @@ on:
     workflows: ["Build agent images"]
     types:
       - completed
-    branches:
-      - main
 
 jobs:
   push:
