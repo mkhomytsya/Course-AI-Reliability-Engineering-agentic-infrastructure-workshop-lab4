@@ -6,6 +6,8 @@ Well-Known URI: GET /.well-known/agent-card.json (RFC 8615)
 import uuid
 import json
 import asyncio
+import logging
+import time
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 from fastapi import FastAPI, Request, HTTPException
@@ -13,6 +15,13 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+)
+log = logging.getLogger("coach-agent")
 
 app = FastAPI(title="MuckeligCoachAgent", version="1.0.0")
 
@@ -22,6 +31,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.perf_counter()
+    body = await request.body()
+    log.info(
+        ">>> %s %s | client=%s | headers=%s | body=%s",
+        request.method,
+        request.url,
+        request.client,
+        dict(request.headers),
+        body.decode("utf-8", errors="replace") or "<empty>",
+    )
+    # Re-inject body so downstream handlers can read it again
+    async def _receive():
+        return {"type": "http.request", "body": body, "more_body": False}
+    request._receive = _receive
+    response = await call_next(request)
+    elapsed = (time.perf_counter() - start) * 1000
+    log.info("<<< %s %s → %s (%.1f ms)", request.method, request.url, response.status_code, elapsed)
+    return response
 
 BASE_URL = os.getenv("AGENT_BASE_URL", "http://localhost:8080")
 GITHUB_OWNER = os.getenv("GITHUB_OWNER", "mkhomytsya")
@@ -95,18 +125,23 @@ async def get_agent_card():
 
 
 # ── A2A JSON-RPC 2.0 ──────────────────────────────────────────────────────────
+@app.post("/")
 @app.post("/a2a")
 async def a2a_endpoint(request: Request):
     try:
         body = await request.json()
     except Exception:
+        log.error("JSON parse error")
         return _error(None, -32700, "Parse error")
 
     rpc_id = body.get("id")
     method = body.get("method", "")
     params = body.get("params", {})
 
+    log.debug("A2A call | id=%s method=%s params=%s", rpc_id, method, json.dumps(params))
+
     if body.get("jsonrpc") != "2.0":
+        log.warning("Invalid JSON-RPC version: %s", body.get("jsonrpc"))
         return _error(rpc_id, -32600, "Invalid JSON-RPC version")
 
     if method == "tasks/send":
@@ -118,6 +153,7 @@ async def a2a_endpoint(request: Request):
     elif method == "agent/getCard":
         return _result(rpc_id, AGENT_CARD)
     else:
+        log.warning("Unknown method: %s", method)
         return _error(rpc_id, -32601, f"Method not found: {method}")
 
 
@@ -167,6 +203,7 @@ async def _tasks_send(rpc_id, params):
     task_id = str(uuid.uuid4())
     text = _extract_text(params)
     skill_id = params.get("metadata", {}).get("skillId", "explain-concept")
+    log.info("tasks/send | task_id=%s skill=%s text=%r", task_id, skill_id, text)
     response_text = _coach_response(text, skill_id)
     task = {
         "id": task_id,
@@ -176,18 +213,22 @@ async def _tasks_send(rpc_id, params):
                        "parts": [{"kind": "text", "text": response_text}]}]
     }
     tasks[task_id] = task
+    log.info("tasks/send → completed | task_id=%s response=%r", task_id, response_text[:120])
     return _result(rpc_id, {"task": task})
 
 
 async def _tasks_get(rpc_id, params):
     task_id = params.get("id")
+    log.debug("tasks/get | task_id=%s", task_id)
     if not task_id or task_id not in tasks:
+        log.warning("tasks/get → not found: %s", task_id)
         return _error(rpc_id, -32001, f"Task not found: {task_id}")
     return _result(rpc_id, {"task": tasks[task_id]})
 
 
 async def _tasks_cancel(rpc_id, params):
     task_id = params.get("id")
+    log.info("tasks/cancel | task_id=%s", task_id)
     if task_id in tasks:
         tasks[task_id]["status"]["state"] = "TASK_STATE_CANCELED"
     return _result(rpc_id, {"taskId": task_id, "canceled": True})
