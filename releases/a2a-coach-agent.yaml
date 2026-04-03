@@ -8,60 +8,23 @@ spec:
   description: >-
     AI learning coach for MuckeligAgentLMS.
     Explains concepts, quizzes learners, and tracks progress via the A2A protocol.
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: coach-agent
-  namespace: kagent
-  labels:
-    app: coach-agent
-    app.kubernetes.io/component: a2a-agent
-    app.kubernetes.io/part-of: muckelig-lms
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: coach-agent
-  template:
-    metadata:
-      labels:
-        app: coach-agent
-      annotations:
-        a2a.protocol/agent-card-path: "/.well-known/agent-card.json"
-        a2a.protocol/version: "1.0.0"
-    spec:
-      containers:
-        - name: coach-agent
-          image: ghcr.io/${github_owner}/${github_repo}/coach-agent:${coach_agent_version}
-          imagePullPolicy: Always
-          ports:
-            - name: http
-              containerPort: 8080
-          env:
-            - name: AGENT_BASE_URL
-              value: "http://coach-agent.kagent.svc.cluster.local:8080"
-            - name: GITHUB_OWNER
-              value: "${github_owner}"
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 30
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "256Mi"
+  byo:
+    deployment:
+      image: ghcr.io/${github_owner}/${github_repo}/coach-agent:${coach_agent_version}
+      imagePullPolicy: Always
+      replicas: 1
+      env:
+        - name: AGENT_BASE_URL
+          value: "http://coach-agent.kagent.svc.cluster.local:8080"
+        - name: GITHUB_OWNER
+          value: "${github_owner}"
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "500m"
+          memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
