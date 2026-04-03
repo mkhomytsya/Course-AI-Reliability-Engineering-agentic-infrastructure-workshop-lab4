@@ -47,7 +47,13 @@ push:
 	$(eval MAJOR=$(shell echo $(TAG) | cut -d. -f1))
 	$(eval MINOR=$(shell echo $(TAG) | cut -d. -f2))
 	$(eval PATCH=$(shell echo $(TAG) | cut -d. -f3))
-	$(eval NEW_TAG=v$(MAJOR).$(MINOR).$(shell echo $$(($(PATCH)+1))))
+	$(eval NEW_TAG=$(shell \
+		PATCH=$$(($(PATCH)+1)); \
+		if [ $$PATCH -gt 9 ]; then \
+			echo v$(MAJOR).$$(($(MINOR)+1)).0; \
+		else \
+			echo v$(MAJOR).$(MINOR).$$PATCH; \
+		fi))
 	@git tag $(NEW_TAG)
 	@git push origin main $(NEW_TAG)
 	@echo "Tagged and pushed $(NEW_TAG)"
