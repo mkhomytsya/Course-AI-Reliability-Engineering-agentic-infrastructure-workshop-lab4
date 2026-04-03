@@ -1,17 +1,10 @@
 name: Push releases as OCI artifact
 
 on:
-  push:
-    tags:
-      - 'v*'
-  workflow_run:
-    workflows: ["Build agent images"]
-    types:
-      - completed
+  workflow_call:
 
 jobs:
   push:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
