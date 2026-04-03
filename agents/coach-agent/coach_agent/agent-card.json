@@ -1,0 +1,52 @@
+{
+  "name": "coach_agent",
+  "description": "AI learning coach for MuckeligAgentLMS. Explains concepts, quizzes learners, and tracks progress.",
+  "url": "http://localhost:8080",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "stateTransitionHistory": true
+  },
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
+  "skills": [
+    {
+      "id": "explain-concept",
+      "name": "Explain Concept",
+      "description": "Explains AI infrastructure topics at the learner's level.",
+      "tags": ["learning", "explanation"],
+      "examples": [
+        "Explain the A2A protocol",
+        "What is kagent?",
+        "How does MCP work?"
+      ],
+      "inputModes": ["text"],
+      "outputModes": ["text"]
+    },
+    {
+      "id": "quiz-learner",
+      "name": "Quiz Learner",
+      "description": "Generates quiz questions on course material and provides feedback.",
+      "tags": ["quiz", "assessment"],
+      "examples": [
+        "Quiz me on MCP basics",
+        "Test my knowledge of A2A"
+      ],
+      "inputModes": ["text"],
+      "outputModes": ["text"]
+    },
+    {
+      "id": "track-progress",
+      "name": "Track Progress",
+      "description": "Summarizes learning progress and recommends next steps.",
+      "tags": ["progress", "analytics"],
+      "examples": [
+        "What should I study next?",
+        "How am I doing?"
+      ],
+      "inputModes": ["text"],
+      "outputModes": ["text"]
+    }
+  ]
+}
