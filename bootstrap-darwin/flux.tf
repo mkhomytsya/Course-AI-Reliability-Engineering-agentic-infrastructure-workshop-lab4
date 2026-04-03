@@ -113,6 +113,7 @@ resource "kubectl_manifest" "rset" {
           postBuild:
             substitute:
               github_owner: "${var.github_owner}"
-              coach_agent_version: "1.0.0"
+              github_repo: "${var.github_repo}"
+              coach_agent_version: "<< inputs.tag >>"
   YAML
 }

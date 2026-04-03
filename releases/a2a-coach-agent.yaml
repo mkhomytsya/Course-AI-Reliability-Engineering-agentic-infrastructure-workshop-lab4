@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: coach-agent
-          image: ghcr.io/${github_owner}/coach-agent:${coach_agent_version}
+          image: ghcr.io/${github_owner}/${github_repo}/coach-agent:${coach_agent_version}
           imagePullPolicy: Always
           ports:
             - name: http
