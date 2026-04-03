@@ -21,50 +21,8 @@ spec:
               key: OPENAI_API_KEY
       resources:
         requests:
-          cpu: "100m"
-          memory: "128Mi"
+          cpu: "200m"
+          memory: "512Mi"
         limits:
-          cpu: "500m"
-          memory: "256Mi"
-    a2aConfig:
-      skills:
-        - id: explain-concept
-          name: Explain Concept
-          description: Explains AI infrastructure topics at the learner's level.
-          inputModes:
-            - text
-          outputModes:
-            - text
-          tags:
-            - learning
-            - explanation
-          examples:
-            - "Explain the A2A protocol"
-            - "What is kagent?"
-            - "How does MCP work?"
-        - id: quiz-learner
-          name: Quiz Learner
-          description: Generates quiz questions on course material and provides feedback.
-          inputModes:
-            - text
-          outputModes:
-            - text
-          tags:
-            - quiz
-            - assessment
-          examples:
-            - "Quiz me on MCP basics"
-            - "Test my knowledge of A2A"
-        - id: track-progress
-          name: Track Progress
-          description: Summarizes learning progress and recommends next steps.
-          inputModes:
-            - text
-          outputModes:
-            - text
-          tags:
-            - progress
-            - analytics
-          examples:
-            - "What should I study next?"
-            - "How am I doing?"
+          cpu: "1000m"
+          memory: "1Gi"
