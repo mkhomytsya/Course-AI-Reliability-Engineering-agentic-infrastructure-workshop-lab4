@@ -110,5 +110,9 @@ resource "kubectl_manifest" "rset" {
           prune: true
           wait: true
           retryInterval: 30s
+          postBuild:
+            substitute:
+              github_owner: "${var.github_owner}"
+              coach_agent_version: "1.0.0"
   YAML
 }

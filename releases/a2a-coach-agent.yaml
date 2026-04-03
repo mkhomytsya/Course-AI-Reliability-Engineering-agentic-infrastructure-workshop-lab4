@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: a2a-agents
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coach-agent
+  namespace: a2a-agents
+  labels:
+    app: coach-agent
+    app.kubernetes.io/component: a2a-agent
+    app.kubernetes.io/part-of: muckelig-lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coach-agent
+  template:
+    metadata:
+      labels:
+        app: coach-agent
+      annotations:
+        a2a.protocol/agent-card-path: "/.well-known/agent-card.json"
+        a2a.protocol/version: "1.0.0"
+    spec:
+      containers:
+        - name: coach-agent
+          image: ghcr.io/${github_owner}/coach-agent:${coach_agent_version}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: AGENT_BASE_URL
+              value: "http://coach-agent.a2a-agents.svc.cluster.local:8080"
+            - name: GITHUB_OWNER
+              value: "${github_owner}"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coach-agent
+  namespace: a2a-agents
+spec:
+  selector:
+    app: coach-agent
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+# ReferenceGrant required: HTTPRoute in a2a-agents references gateway in agentgateway-system
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: coach-agent
+  namespace: a2a-agents
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: a2a-agents
+  to:
+    - group: ""
+      kind: Service
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: coach-agent
+  namespace: a2a-agents
+spec:
+  parentRefs:
+    - name: agentgateway-external
+      namespace: agentgateway-system
+  hostnames:
+    - "coach-agent.abox.local"
+  rules:
+    # Well-Known URI — agent card discovery (highest priority)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/.well-known"
+      backendRefs:
+        - name: coach-agent
+          namespace: a2a-agents
+          port: 8080
+    # A2A JSON-RPC endpoint
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/a2a"
+      backendRefs:
+        - name: coach-agent
+          namespace: a2a-agents
+          port: 8080
+    # Health + root
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: coach-agent
+          namespace: a2a-agents
+          port: 8080

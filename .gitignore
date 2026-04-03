@@ -36,3 +36,4 @@ terraform.rc
 CLAUDE.md
 
 .DS_Store
+.local
