@@ -22,9 +22,13 @@ cd bootstrap-darwin
 tofu init
 log "tofu init done"
 
-log "Running tofu apply..."
+log "Running tofu apply (phase 1: cluster)..."
+tofu apply -auto-approve -target=null_resource.k3d_cluster
+log "Phase 1 done"
+
+log "Running tofu apply (phase 2: Flux + releases)..."
 tofu apply -auto-approve
-log "tofu apply done"
+log "Phase 2 done"
 
 export KUBECONFIG=~/.kube/config
 

@@ -1,0 +1,5 @@
+# Copy this file to terraform.tfvars and set your own values.
+# terraform.tfvars is gitignored — safe to put real values there.
+
+github_owner = "mkhomytsya"
+# github_repo = "course-ai-reliability-engineering-agentic-infrastructure-workshop-lab4"

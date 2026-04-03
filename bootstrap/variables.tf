@@ -4,10 +4,20 @@ variable "cluster_name" {
   default     = "abox"
 }
 
-variable "oci_registry" {
-  description = "OCI registry base URL"
+variable "github_owner" {
+  description = "GitHub owner (user or org) for GHCR image publishing"
   type        = string
-  default     = "oci://ghcr.io/mkhomytsya/course-ai-reliability-engineering-agentic-infrastructure-workshop-lab2"
+  default     = "mkhomytsya"
+}
+
+variable "github_repo" {
+  description = "GitHub repository name"
+  type        = string
+  default     = "course-ai-reliability-engineering-agentic-infrastructure-workshop-lab4"
+}
+
+locals {
+  oci_registry = "oci://ghcr.io/${var.github_owner}/${var.github_repo}"
 }
 
 variable "releases_version" {

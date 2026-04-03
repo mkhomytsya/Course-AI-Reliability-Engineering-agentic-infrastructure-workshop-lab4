@@ -45,7 +45,7 @@ resource "kubectl_manifest" "rsip" {
         fluxcd.controlplane.io/reconcileEvery: 5m
     spec:
       type: OCIArtifactTag
-      url: ${var.oci_registry}/releases
+      url: ${local.oci_registry}/releases
       filter:
         includeTag: "^\\d+\\.\\d+\\.\\d+$"
         limit: 1
@@ -78,7 +78,7 @@ resource "kubectl_manifest" "rset" {
           namespace: flux-system
         spec:
           interval: 2m
-          url: ${var.oci_registry}/releases
+          url: ${local.oci_registry}/releases
           ref:
             tag: "<< inputs.tag >>"
       - apiVersion: kustomize.toolkit.fluxcd.io/v1

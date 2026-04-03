@@ -130,7 +130,7 @@ make run  →  scripts/setup.sh
   → tofu apply (bootstrap/)
       → KinD cluster
       → Flux Operator + FluxInstance
-      → ResourceSetInputProvider   polls oci://ghcr.io/mkhomytsya/course-ai-reliability-engineering-agentic-infrastructure-workshop-lab2/releases
+      → ResourceSetInputProvider   polls oci://ghcr.io/<github_owner>/<github_repo>/releases
       → ResourceSet                creates OCIRepository + 2 Kustomizations
           → releases/crds/    gateway-api-crds, agentgateway-crds, kagent-crds
           → releases/         agentgateway (Gateway + GatewayClass)
@@ -138,6 +138,20 @@ make run  →  scripts/setup.sh
 ```
 
 Everything after the cluster is **gitless GitOps via OCI**: no Git polling, no deploy keys. CI publishes `releases/` as an OCI artifact on every version tag. The cluster reconciles from that artifact automatically.
+
+## Forking / using your own registry
+
+The OCI registry URL is derived from two Tofu variables (`github_owner`, `github_repo`). When you fork the repo:
+
+```bash
+# Darwin (arm64)
+cp bootstrap-darwin/terraform.tfvars.example bootstrap-darwin/terraform.tfvars
+
+# Linux / other
+cp bootstrap/terraform.tfvars.example bootstrap/terraform.tfvars
+```
+
+Edit the file and set `github_owner` to your GitHub username (or org). `make run` picks it up automatically — no other changes needed.
 
 ## Releasing
 
