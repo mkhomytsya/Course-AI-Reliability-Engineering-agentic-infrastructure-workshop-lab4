@@ -2,6 +2,8 @@
 
 > One command. Full AI infrastructure.
 
+> **Note:** This is a copy of [den-vasyliev/abox](https://github.com/den-vasyliev/abox) made for educational purposes.
+
 ## Demo
 
 ▶️ ![Demo](docs/demo.gif)
