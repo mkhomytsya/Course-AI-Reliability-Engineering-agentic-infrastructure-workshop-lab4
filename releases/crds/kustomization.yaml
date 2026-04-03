@@ -5,3 +5,4 @@ resources:
   - gateway-api-crds.yaml
   - agentgateway-crds.yaml
   - kagent-crds.yaml
+  - agentregistry-crds.yaml
