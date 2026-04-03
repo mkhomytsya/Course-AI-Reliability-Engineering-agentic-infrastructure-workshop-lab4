@@ -1,13 +1,8 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: a2a-agents
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: coach-agent
-  namespace: a2a-agents
+  namespace: kagent
   labels:
     app: coach-agent
     app.kubernetes.io/component: a2a-agent
@@ -34,7 +29,7 @@ spec:
               containerPort: 8080
           env:
             - name: AGENT_BASE_URL
-              value: "http://coach-agent.a2a-agents.svc.cluster.local:8080"
+              value: "http://coach-agent.kagent.svc.cluster.local:8080"
             - name: GITHUB_OWNER
               value: "${github_owner}"
           readinessProbe:
@@ -61,7 +56,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: coach-agent
-  namespace: a2a-agents
+  namespace: kagent
 spec:
   selector:
     app: coach-agent
@@ -70,26 +65,11 @@ spec:
       port: 8080
       targetPort: 8080
 ---
-# ReferenceGrant required: HTTPRoute in a2a-agents references gateway in agentgateway-system
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: ReferenceGrant
-metadata:
-  name: coach-agent
-  namespace: a2a-agents
-spec:
-  from:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: a2a-agents
-  to:
-    - group: ""
-      kind: Service
----
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: coach-agent
-  namespace: a2a-agents
+  namespace: kagent
 spec:
   parentRefs:
     - name: agentgateway-external
@@ -104,7 +84,7 @@ spec:
             value: "/.well-known"
       backendRefs:
         - name: coach-agent
-          namespace: a2a-agents
+          namespace: kagent
           port: 8080
     # A2A JSON-RPC endpoint
     - matches:
@@ -113,7 +93,7 @@ spec:
             value: "/a2a"
       backendRefs:
         - name: coach-agent
-          namespace: a2a-agents
+          namespace: kagent
           port: 8080
     # Health + root
     - matches:
@@ -122,5 +102,5 @@ spec:
             value: "/"
       backendRefs:
         - name: coach-agent
-          namespace: a2a-agents
+          namespace: kagent
           port: 8080
