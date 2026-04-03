@@ -30,7 +30,7 @@ spec:
     replicaCount: 1
     image:
       repository: ghcr.io/den-vasyliev/agentregistry-inventory
-      tag: "main"
+      tag: "0.5.4"
       pullPolicy: Always
     disableAuth: true
     controller:
