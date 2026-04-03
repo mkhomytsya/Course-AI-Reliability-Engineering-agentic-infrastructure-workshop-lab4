@@ -1,3 +1,14 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: coach-agent
+  namespace: kagent
+spec:
+  type: BYO
+  description: >-
+    AI learning coach for MuckeligAgentLMS.
+    Explains concepts, quizzes learners, and tracks progress via the A2A protocol.
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
