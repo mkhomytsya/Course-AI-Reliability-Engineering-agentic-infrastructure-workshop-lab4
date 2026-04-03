@@ -1,0 +1,9 @@
+[project]
+name = "coach-agent"
+version = "0.1"
+description = "AI learning coach agent for MuckeligAgentLMS"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "google-adk>=1.22.1",
+]

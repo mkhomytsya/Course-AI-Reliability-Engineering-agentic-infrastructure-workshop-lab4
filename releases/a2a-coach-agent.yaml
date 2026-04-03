@@ -14,10 +14,11 @@ spec:
       imagePullPolicy: Always
       replicas: 1
       env:
-        - name: AGENT_BASE_URL
-          value: "http://coach-agent.kagent.svc.cluster.local:8080"
-        - name: GITHUB_OWNER
-          value: "${github_owner}"
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kagent-openai
+              key: OPENAI_API_KEY
       resources:
         requests:
           cpu: "100m"
@@ -25,56 +26,45 @@ spec:
         limits:
           cpu: "500m"
           memory: "256Mi"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: coach-agent
-  namespace: kagent
-spec:
-  selector:
-    app: coach-agent
-  ports:
-    - name: http
-      port: 8080
-      targetPort: 8080
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: coach-agent
-  namespace: kagent
-spec:
-  parentRefs:
-    - name: agentgateway-external
-      namespace: agentgateway-system
-  hostnames:
-    - "coach-agent.abox.local"
-  rules:
-    # Well-Known URI — agent card discovery (highest priority)
-    - matches:
-        - path:
-            type: PathPrefix
-            value: "/.well-known"
-      backendRefs:
-        - name: coach-agent
-          namespace: kagent
-          port: 8080
-    # A2A JSON-RPC endpoint
-    - matches:
-        - path:
-            type: PathPrefix
-            value: "/a2a"
-      backendRefs:
-        - name: coach-agent
-          namespace: kagent
-          port: 8080
-    # Health + root
-    - matches:
-        - path:
-            type: PathPrefix
-            value: "/"
-      backendRefs:
-        - name: coach-agent
-          namespace: kagent
-          port: 8080
+    a2aConfig:
+      skills:
+        - id: explain-concept
+          name: Explain Concept
+          description: Explains AI infrastructure topics at the learner's level.
+          inputModes:
+            - text
+          outputModes:
+            - text
+          tags:
+            - learning
+            - explanation
+          examples:
+            - "Explain the A2A protocol"
+            - "What is kagent?"
+            - "How does MCP work?"
+        - id: quiz-learner
+          name: Quiz Learner
+          description: Generates quiz questions on course material and provides feedback.
+          inputModes:
+            - text
+          outputModes:
+            - text
+          tags:
+            - quiz
+            - assessment
+          examples:
+            - "Quiz me on MCP basics"
+            - "Test my knowledge of A2A"
+        - id: track-progress
+          name: Track Progress
+          description: Summarizes learning progress and recommends next steps.
+          inputModes:
+            - text
+          outputModes:
+            - text
+          tags:
+            - progress
+            - analytics
+          examples:
+            - "What should I study next?"
+            - "How am I doing?"

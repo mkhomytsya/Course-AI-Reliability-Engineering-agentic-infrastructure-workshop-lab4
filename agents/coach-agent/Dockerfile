@@ -1,14 +1,13 @@
-FROM python:3.12-slim
+ARG DOCKER_REGISTRY=ghcr.io
+ARG VERSION=latest
+FROM ${DOCKER_REGISTRY}/kagent-dev/kagent/kagent-adk:${VERSION}
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir fastapi uvicorn[standard]
+COPY coach_agent/ coach_agent/
+COPY pyproject.toml pyproject.toml
+COPY .python-version .python-version
 
-COPY main.py .
+RUN uv sync --refresh
 
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"
-
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["coach_agent"]
