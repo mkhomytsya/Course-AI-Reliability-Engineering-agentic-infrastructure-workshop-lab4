@@ -52,7 +52,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             DOCKER_REGISTRY=ghcr.io
-            VERSION=latest
+            VERSION=0.7.23
 
   push-oci:
     needs: build
