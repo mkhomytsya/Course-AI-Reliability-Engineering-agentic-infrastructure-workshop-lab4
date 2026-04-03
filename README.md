@@ -4,6 +4,22 @@
 
 > **Note:** This is a copy of [den-vasyliev/abox](https://github.com/den-vasyliev/abox) made for educational purposes.
 
+## Початківці (завдання на сертифікат)
+
+### Research
+
+1. Ознайомитися із специфікацією A2A — https://a2a-protocol.org
+
+### Development
+
+2. Реалізувати власного агента (будь-який фреймворк) з **Agent Card** та отримати карту агента за **Well-Known URI**
+
+### Infrastructure
+
+3. Розгорнути **Inventory** на abox (або власному робочому середовищі) та отримати перелік AI ресурсів в кластері
+
+---
+
 ## Demo
 
 ▶️ ![Demo](docs/demo.gif)
